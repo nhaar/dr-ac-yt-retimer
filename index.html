@@ -7,7 +7,6 @@
   <meta name="version" content="1.1.1" />
   <title>YouTube Frame Timer</title>
   <link rel="stylesheet" href="https://stackedit.io/style.css" />
-  <script src="main.js"></script>
 </head>
 
 <body class="stackedit">
@@ -23,7 +22,7 @@
       two numbers after the @ and enter them for framerate.</p>
     <p>
       <label for="framerate">Framerate: </label>
-      <input type="text" id="framerate" size="3" value="60" onchange='validateFPS(event)' />
+      <input type="text" id="framerate" size="3" value="60"/>
     </p>
     <h3 id="video-endpoints">Video Endpoints</h3>
     <p>
@@ -32,20 +31,21 @@
     </p>
     <p>
       <label for="startobj">Starting frame: </label>
-      <input type="text" id="startobj" style='width:100%' onchange='parseForTime(event)' />
+      <input type="text" id="startobj" style='width:100%' />
     </p>
     <p>
       <label for="endobj">Ending frame: </label>
-      <input type="text" id="endobj" style='width:100%' onchange='parseForTime(event)' />
+      <input type="text" id="endobj" style='width:100%' />
     </p>
     <h3 id="video-time">Video Time</h3>
-    <button id="computeButton" onclick="compute()">Compute time</button>&nbsp;<input type="text" id="time" readonly
+    <button id="computeButton">Compute time</button>&nbsp;<input type="text" id="time" readonly
       size="20" />
     <p>
       <textarea id="modMessage" cols="40" rows="5" disabled></textarea>
     </p>
-    <button id="modMessageButton" onclick="copyModMessage()" disabled>Copy Mod Message to Clipboard</button>
+    <button id="modMessageButton" disabled>Copy Mod Message to Clipboard</button>
   </div>
+  <script src="main.js"></script>
 </body>
 
 </html>
