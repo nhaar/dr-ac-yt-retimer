@@ -3,11 +3,6 @@
  * @typedef {HTMLInputElement[]} TimeInputs
  */
 
-/**
- * String representation of a decimal number which represents a time in seconds
- * @typedef {Timestamp} string
- */
-
 const CHAPTERS = 2
 
 generatePage()
