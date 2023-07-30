@@ -123,8 +123,8 @@ function compute(startFrame, endFrame) {
   // Get framerate, start frame, and end frame from corresponding elements
   // Double check they all have a value
   const frameRate = parseInt(document.getElementById('framerate').value)
-  if (typeof (startFrame) === 'undefined' || endFrame === 'undefined' || frameRate === 'undefined') {
-    return
+  if (!startFrame || !endFrame || !frameRate) {
+    return ''
   }
 
   // Calculate framerate
