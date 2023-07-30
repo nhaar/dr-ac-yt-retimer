@@ -11,11 +11,12 @@
 
 <body class="stackedit">
   <div class="stackedit__html">
-    <h1 id="youtube-interval-timer">YouTube Interval Timer</h1>
+    <h1 id="youtube-interval-timer">Deltarune All Chapter Retimer (for YouTube)</h1>
     <h3 id="about">About</h3>
-    <p>Takes start and stop points of a YouTube video, down to the frame, and gives the time between them in the format
-      <code>1h 23m 45s 678ms</code>. Source code is <a
-        href="https://github.com/slashinfty/yt-frame-timer">available</a>.
+    <p>A tool for retiming all chapter runs of deltarune.
+      It consists of retiming the two chapters and adding their total time,
+      as well as take the RTA time which is the total time between them. Source code is <a
+        href="https://github.com/nhaar/dr-ac-yt-retimer">available</a>, originally from <a href="https://github.com/slashinfty/yt-frame-timer"> here</a>
     </p>
     <h3 id="video-framerate">Video Framerate</h3>
     <p>Right click the YouTube video and select “Stats for nerds.” The third line is “Current / Optimal Res” - find the
@@ -26,8 +27,9 @@
     </p>
     <h3 id="video-endpoints">Video Endpoints</h3>
     <p>
-      Find the starting point (you can use the <code>,</code> and <code>.</code> keys to find the exact frame). Right
-      click the video and select “Copy debug info” and paste it for starting frame. Repeat for ending frame.
+      Find the relevant points (you can use the <code>,</code> and <code>.</code> keys to find the exact frame), right
+      click the video and select “Copy debug info” and paste it for the frame you are doing.
+      Do this for each one of the below.
     </p>
     <p>
       <label for="startobj">Starting frame: </label>
@@ -40,10 +42,6 @@
     <h3 id="video-time">Video Time</h3>
     <button id="computeButton">Compute time</button>&nbsp;<input type="text" id="time" readonly
       size="20" />
-    <p>
-      <textarea id="modMessage" cols="40" rows="5" disabled></textarea>
-    </p>
-    <button id="modMessageButton" disabled>Copy Mod Message to Clipboard</button>
   </div>
   <script src="main.js"></script>
 </body>
