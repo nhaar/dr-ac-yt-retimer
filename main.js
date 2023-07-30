@@ -18,8 +18,6 @@ function generatePage () {
   const computedRTA = createComputed('rta-time')
 
   const chapterElements = {}
-  const rtaInputs = []
-  const chapterComputed = []
 
   for (let i = 0; i < CHAPTERS; i++) {
     const createInput = label => {
@@ -36,12 +34,8 @@ function generatePage () {
     ]
     const inputs = inputParents.map(p => p.children[1])
 
-    if (i === 0) rtaInputs.push(inputs[0])
-    else if (i === CHAPTERS - 1) rtaInputs.push(inputs[1])
-
     createElement({ parent: headers, tag: 'h3', innerHTML: `Chapter ${ch} Time` })
     const computed = createComputedInput(headers)
-    chapterComputed.push(computed)
 
     chapterElements[ch] = { inputs, computed }
 
@@ -140,8 +134,6 @@ function createElement (options) {
 
   return newElement
 }
-
-// function displayTime (inputs, computed, computedRTA, computedIGT)
 
 /**
  * Gets the framerate from the user input
