@@ -1,8 +1,21 @@
+/**
+ * Array containing two inputs, first one stores a start time and second one stores an end time
+ * @typedef {HTMLInputElement[]} TimeInputs
+ */
+
+/**
+ * String representation of a decimal number which represents a time in seconds
+ * @typedef {Timestamp} string
+ */
+
 const CHAPTERS = 2
 
 generatePage()
 
-function generatePage () {
+/**
+ * Generates all the inputs and setups controls
+ */
+function generatePage() {
   const div = getById('time-inputs')
   const headers = getById('segment-headers')
   const rtaInputs = []
@@ -38,57 +51,35 @@ function generatePage () {
   }
 }
 
-addClickToElement('computeButton', compute)
-addChangeToElement('framerate', validateFPS)
-
-function getById (id) {
+/**
+ * Get an element from the DOM with its HTML id
+ * @param {string} id - Id of the element
+ * @returns {HTMLElement} - Element
+ */
+function getById(id) {
   return document.getElementById(id)
 }
 
-function addEventToElement (e, id, fn) {
-  getById(id).addEventListener(e, fn)
-}
 
-function addClickToElement (id, fn) {
-  addEventToElement('click', id, fn)
-}
-
-function addChangeToElement (id, fn) {
-  addEventToElement('change', id, fn)
-}
-
-function createElement (options) {
+/**
+ * Create element based on options
+ * @param {object} options
+ * @param {HTMLElement} options.parent - Parent element to append to
+ * @param {string} options.tag - HTML tag for the element
+ * @returns {HTMLElement} Created element
+ */
+function createElement(options) {
   let tag
   if (options) ({ tag } = options)
   if (!tag) tag = 'div'
 
   const newElement = document.createElement(tag)
   if (options) {
-    const { parent, className, innerHTML, classes, type, value, dataset, checked } = options
+    const { parent, innerHTML } = options
     let { tag } = options
     if (!tag) tag = 'div'
 
-    if (className) newElement.className = className
-
-    if (classes) {
-      classes.forEach(className => {
-        newElement.classList.add(className)
-      })
-    }
-
     if (innerHTML) newElement.innerHTML = innerHTML
-
-    if (type) newElement.setAttribute('type', type)
-
-    if (checked) newElement.setAttribute('checked', checked)
-
-    if (value) newElement.value = value
-
-    if (dataset) {
-      for (const variable in dataset) {
-        newElement.dataset[variable] = dataset[variable]
-      }
-    }
 
     if (parent) parent.appendChild(newElement)
   }
@@ -96,20 +87,33 @@ function createElement (options) {
   return newElement
 }
 
-function displayTime (inputs, computed) {
-  console.log(inputs)
+/**
+ * Display the time calculated from two inputs into another input
+ * @param {TimeInputs} inputs Inputs with time
+ * @param {HTMLInputElement} computed Input element that will store the time
+ */
+function displayTime(inputs, computed) {
   const values = inputs.map(input => input.value)
   const time = compute(values[0], values[1])
   computed.value = time
 }
 
-function displayRTATime (inputs) {
+/**
+ * Display the run's RTA time
+ * @param {TimeInputs} inputs Inputs with time
+ */
+function displayRTATime(inputs) {
   const computed = getById('rta-time')
   displayTime(inputs, computed)
 }
 
-function compute (startFrame, endFrame) {
-  console.log(startFrame, endFrame)
+/**
+ * 
+ * @param {Timestamp} startFrame - Start time
+ * @param {Timestamp} endFrame - End time
+ * @returns {string} A formatted time string
+ */
+function compute(startFrame, endFrame) {
   // Initiate basic time variables
   let hours = 0
   let minutes = 0
@@ -124,6 +128,7 @@ function compute (startFrame, endFrame) {
   }
 
   // Calculate framerate
+  // Implicitly converts to number
   let frames = (endFrame - startFrame) * frameRate
   seconds = Math.floor(frames / frameRate)
   frames = frames % frameRate
@@ -147,22 +152,11 @@ function compute (startFrame, endFrame) {
   return hours.toString() + 'h ' + minutes.toString() + 'm ' + seconds.toString() + 's ' + milliseconds.toString() + 'ms'
 }
 
-function validateFPS (event) {
-  // If framerate is invalid, show an error message and disable start and end frame fields
-  if (event.target.value === '' || parseInt(event.target.value) <= 0 || isNaN(parseInt(event.target.value))) {
-    document.getElementById('framerate').setCustomValidity('Please enter a valid framerate.')
-    document.getElementById('framerate').reportValidity()
-    document.getElementById('startobj').disabled = true
-    document.getElementById('endobj').disabled = true
-    document.getElementById('computeButton').disabled = true
-  } else {
-    document.getElementById('startobj').disabled = false
-    document.getElementById('endobj').disabled = false
-    document.getElementById('computeButton').disabled = false
-  }
-}
-
-function parseForTime (event) {
+/**
+ * Convert the debug stat info into a number in seconds
+ * @param {Event} event - Event for the input being updated with debug stat
+ */
+function parseForTime(event) {
   // Get current frame from input field (either start time or end time)
   const frameFromInputText = (JSON.parse(event.target.value)).lct
   if (typeof frameFromInputText !== 'undefined') {
