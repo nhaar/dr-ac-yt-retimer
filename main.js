@@ -1,13 +1,52 @@
-/* global alert */
+const CHAPTERS = 2
 
-addClickToElement('modMessageButton', copyModMessage)
+generatePage()
+
+function generatePage () {
+  const div = getById('time-inputs')
+  const headers = getById('segment-headers')
+  const rtaInputs = []
+
+  for (let i = 0; i < CHAPTERS; i++) {
+    const createInput = label => {
+      const html = `
+        <label for="startobj"> ${label} </label>
+        <input type="text" style='width:100%'/>
+      `
+      return createElement({ parent: div, tag: 'p', innerHTML: html })
+    }
+    const ch = i + 1
+    const inputParents = [
+      createInput(`Chapter ${ch} Start`),
+      createInput(`Chapter ${ch} End`)
+    ]
+    const inputs = inputParents.map(p => p.children[1])
+
+    if (i === 0) rtaInputs.push(inputs[0])
+    else if (i === CHAPTERS - 1) rtaInputs.push(inputs[1])
+
+    createElement({ parent: headers, tag: 'h3', innerHTML: `Chapter ${ch} Time` })
+    const computed = createElement({ parent: headers, tag: 'input' })
+    computed.setAttribute('readonly', '')
+    computed.size = '20'
+
+    inputs.forEach(input => input.addEventListener('change', e => {
+      parseForTime(e)
+      displayTime(inputs, computed)
+      displayRTATime(rtaInputs)
+    }))
+  }
+}
+
 addClickToElement('computeButton', compute)
 addChangeToElement('framerate', validateFPS)
-addChangeToElement('startobj', parseForTime)
-addChangeToElement('endobj', parseForTime)
+
+function getById (id) {
+  return document.getElementById(id)
+}
 
 function addEventToElement (e, id, fn) {
-  document.getElementById(id).addEventListener(e, fn)
+  getById(id).addEventListener(e, fn)
 }
 
 function addClickToElement (id, fn) {
@@ -18,7 +57,59 @@ function addChangeToElement (id, fn) {
   addEventToElement('change', id, fn)
 }
 
-function compute () {
+function createElement (options) {
+  let tag
+  if (options) ({ tag } = options)
+  if (!tag) tag = 'div'
+
+  const newElement = document.createElement(tag)
+  if (options) {
+    const { parent, className, innerHTML, classes, type, value, dataset, checked } = options
+    let { tag } = options
+    if (!tag) tag = 'div'
+
+    if (className) newElement.className = className
+
+    if (classes) {
+      classes.forEach(className => {
+        newElement.classList.add(className)
+      })
+    }
+
+    if (innerHTML) newElement.innerHTML = innerHTML
+
+    if (type) newElement.setAttribute('type', type)
+
+    if (checked) newElement.setAttribute('checked', checked)
+
+    if (value) newElement.value = value
+
+    if (dataset) {
+      for (const variable in dataset) {
+        newElement.dataset[variable] = dataset[variable]
+      }
+    }
+
+    if (parent) parent.appendChild(newElement)
+  }
+
+  return newElement
+}
+
+function displayTime (inputs, computed) {
+  console.log(inputs)
+  const values = inputs.map(input => input.value)
+  const time = compute(values[0], values[1])
+  computed.value = time
+}
+
+function displayRTATime (inputs) {
+  const computed = getById('rta-time')
+  displayTime(inputs, computed)
+}
+
+function compute (startFrame, endFrame) {
+  console.log(startFrame, endFrame)
   // Initiate basic time variables
   let hours = 0
   let minutes = 0
@@ -28,11 +119,9 @@ function compute () {
   // Get framerate, start frame, and end frame from corresponding elements
   // Double check they all have a value
   const frameRate = parseInt(document.getElementById('framerate').value)
-  const startFrame = document.getElementById('startobj').value
-  const endFrame = document.getElementById('endobj').value
   if (typeof (startFrame) === 'undefined' || endFrame === 'undefined' || frameRate === 'undefined') {
     return
-  };
+  }
 
   // Calculate framerate
   let frames = (endFrame - startFrame) * frameRate
@@ -54,6 +143,8 @@ function compute () {
     minutes = minutes % 60
     minutes = minutes < 10 ? '0' + minutes : minutes
   }
+
+  return hours.toString() + 'h ' + minutes.toString() + 'm ' + seconds.toString() + 's ' + milliseconds.toString() + 'ms'
 }
 
 function validateFPS (event) {
@@ -81,6 +172,6 @@ function parseForTime (event) {
     const frameFromObj = (time, fps) => Math.floor(time * fps) / fps // round to the nearest frame
     const finalFrame = frameFromObj(frameFromInputText, frameRate)
     // Update the DOM
-    document.getElementById(event.target.id).value = `${finalFrame}`
+    event.target.value = `${finalFrame}`
   }
 }

@@ -31,17 +31,12 @@
       click the video and select “Copy debug info” and paste it for the frame you are doing.
       Do this for each one of the below.
     </p>
-    <p>
-      <label for="startobj">Starting frame: </label>
-      <input type="text" id="startobj" style='width:100%' />
-    </p>
-    <p>
-      <label for="endobj">Ending frame: </label>
-      <input type="text" id="endobj" style='width:100%' />
-    </p>
-    <h3 id="video-time">Video Time</h3>
-    <button id="computeButton">Compute time</button>&nbsp;<input type="text" id="time" readonly
+    <div id="time-inputs"></div>
+    <div id="segment-headers"></div>
+    <h3 id="video-time">RTA Time</h3>
+    <input type="text" id="rta-time" readonly
       size="20" />
+      <br><br>
   </div>
   <script src="main.js"></script>
 </body>
