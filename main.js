@@ -53,32 +53,57 @@ function generatePage () {
     inputs.forEach(input => input.addEventListener('change', e => {
       parseForTime(e)
       updateTimes(ch, chapterElements, computedRTA, computedIGT)
-      displayTime(inputs, computed)
-      displayIGT(chapterComputed, computedIGT)
-      displayTime(rtaInputs, computedRTA)
     }))
   }
 }
 
-function updateTimes (ch, elements, computedRTA, computedIGT) {
-  displayTime(elements[ch].inputs, elements[ch].computed)
+/**
+ * Computes and updates the final times for each time display
+ * @param {number} currentCh - Chapter time that is being updated
+ * @param {object} elements - An object that maps chapter number -> an object containing inputs which has `TimeInputs` and computed which has the display input
+ * @param {HTMLInputElement} computedRTA - Input that displays the RTA time
+ * @param {HTMLInputElement} computedIGT - Input that displays the IGT time
+ */
+function updateTimes (currentCh, elements, computedRTA, computedIGT) {
+  const frameRate = getFrameRate()
+  const updateComputed = (element, delta) => { element.value = formatTime(delta, frameRate) }
+
+  // rta time
   const rtaInputs = [
     elements[1].inputs[0],
     elements[CHAPTERS].inputs[1]
   ]
-  displayTime(rtaInputs, computedRTA)
+  updateComputed(computedRTA, getDelta(rtaInputs))
+
+  // igt and chapter times
   let total = 0
   for (const chapter in elements) {
     const { inputs } = elements[chapter]
-    const values = inputs.map(input => Number(input.value))
-    console.log(values)
-    total += values[1] - values[0]
+    const delta = getDelta(inputs)
+    // update if current chapter is the one that fired this update
+    if (Number(chapter) === currentCh) updateComputed(elements[currentCh].computed, delta)
+    total += delta
   }
-  console.log(total)
-  const frameRate = getFrameRate()
-  computedIGT.value = formatTime(total, frameRate)
+
+  // update total IGT
+  updateComputed(computedIGT, total)
 }
 
+/**
+ * Gets the time difference from two time inputs
+ * @param {TimeInputs} inputs - Inputs with the values
+ * @returns {number} Time difference in seconds
+ */
+function getDelta (inputs) {
+  const values = inputs.map(input => Number(input.value))
+  return values[1] - values[0]
+}
+
+/**
+ * Creates a display input that stores a computed time
+ * @param {HTMLElement} parent - Parent element to append to
+ * @returns {HTMLInputElement} The input element
+ */
 function createComputedInput (parent) {
   const computed = createElement({ parent, tag: 'input' })
   computed.setAttribute('readonly', '')
@@ -124,60 +149,19 @@ function createElement (options) {
 // function displayTime (inputs, computed, computedRTA, computedIGT)
 
 /**
- * Display the time calculated from two inputs into another input
- * @param {TimeInputs} inputs Inputs with time
- * @param {HTMLInputElement} computed Input element that will store the time
+ * Gets the framerate from the user input
+ * @returns {number} Framerate in frames per second
  */
-function displayTime (inputs, computed) {
-  const values = inputs.map(input => input.value)
-  const time = compute(values[0], values[1])
-  computed.value = time
-}
-
-/**
- * Display the run's RTA time
- * @param {TimeInputs} inputs Inputs with time
- */
-function displayIGT (chapterComputed, computedIGT) {
-  let total = 0
-  console.log(chapterComputed)
-  chapterComputed.forEach(computed => {
-    total += Number(computed.value)
-  })
-
-  if (isNaN(total)) return ''
-  console.log(total)
-
-  const frameRate = getFrameRate()
-  computedIGT.value = formatTime(total, frameRate)
-}
-
 function getFrameRate () {
   return parseInt(document.getElementById('framerate').value)
 }
 
 /**
- *
- * @param {Timestamp} startFrame - Start time
- * @param {Timestamp} endFrame - End time
- * @returns {string} A formatted time string
+ * Formats a time in seconds
+ * @param {number} delta - The time in seconds
+ * @param {number} frameRate - Run framerate in frames per second
+ * @returns {string} Formatted time string
  */
-function compute (startFrame, endFrame) {
-  // Initiate basic time variables
-
-  // Get framerate, start frame, and end frame from corresponding elements
-  // Double check they all have a value
-  const frameRate = getFrameRate()
-  if (!startFrame || !endFrame || !frameRate) {
-    return ''
-  }
-
-  // Calculate framerate
-  // Implicitly converts to number
-  const delta = (endFrame - startFrame)
-  return formatTime(delta, frameRate)
-}
-
 function formatTime (delta, frameRate) {
   if (isNaN(delta)) return ''
   const totalFrames = Math.round(delta * frameRate)
