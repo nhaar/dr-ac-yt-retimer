@@ -15,10 +15,16 @@ generatePage()
 /**
  * Generates all the inputs and setups controls
  */
-function generatePage() {
+function generatePage () {
   const div = getById('time-inputs')
   const headers = getById('segment-headers')
+  const createComputed = id => createComputedInput(getById(id))
+  const computedIGT = createComputed('igt-time')
+  const computedRTA = createComputed('rta-time')
+
+  const chapterElements = {}
   const rtaInputs = []
+  const chapterComputed = []
 
   for (let i = 0; i < CHAPTERS; i++) {
     const createInput = label => {
@@ -39,16 +45,45 @@ function generatePage() {
     else if (i === CHAPTERS - 1) rtaInputs.push(inputs[1])
 
     createElement({ parent: headers, tag: 'h3', innerHTML: `Chapter ${ch} Time` })
-    const computed = createElement({ parent: headers, tag: 'input' })
-    computed.setAttribute('readonly', '')
-    computed.size = '20'
+    const computed = createComputedInput(headers)
+    chapterComputed.push(computed)
+
+    chapterElements[ch] = { inputs, computed }
 
     inputs.forEach(input => input.addEventListener('change', e => {
       parseForTime(e)
+      updateTimes(ch, chapterElements, computedRTA, computedIGT)
       displayTime(inputs, computed)
-      displayRTATime(rtaInputs)
+      displayIGT(chapterComputed, computedIGT)
+      displayTime(rtaInputs, computedRTA)
     }))
   }
+}
+
+function updateTimes (ch, elements, computedRTA, computedIGT) {
+  displayTime(elements[ch].inputs, elements[ch].computed)
+  const rtaInputs = [
+    elements[1].inputs[0],
+    elements[CHAPTERS].inputs[1]
+  ]
+  displayTime(rtaInputs, computedRTA)
+  let total = 0
+  for (const chapter in elements) {
+    const { inputs } = elements[chapter]
+    const values = inputs.map(input => Number(input.value))
+    console.log(values)
+    total += values[1] - values[0]
+  }
+  console.log(total)
+  const frameRate = getFrameRate()
+  computedIGT.value = formatTime(total, frameRate)
+}
+
+function createComputedInput (parent) {
+  const computed = createElement({ parent, tag: 'input' })
+  computed.setAttribute('readonly', '')
+  computed.size = '20'
+  return computed
 }
 
 /**
@@ -56,10 +91,9 @@ function generatePage() {
  * @param {string} id - Id of the element
  * @returns {HTMLElement} - Element
  */
-function getById(id) {
+function getById (id) {
   return document.getElementById(id)
 }
-
 
 /**
  * Create element based on options
@@ -68,7 +102,7 @@ function getById(id) {
  * @param {string} options.tag - HTML tag for the element
  * @returns {HTMLElement} Created element
  */
-function createElement(options) {
+function createElement (options) {
   let tag
   if (options) ({ tag } = options)
   if (!tag) tag = 'div'
@@ -87,12 +121,14 @@ function createElement(options) {
   return newElement
 }
 
+// function displayTime (inputs, computed, computedRTA, computedIGT)
+
 /**
  * Display the time calculated from two inputs into another input
  * @param {TimeInputs} inputs Inputs with time
  * @param {HTMLInputElement} computed Input element that will store the time
  */
-function displayTime(inputs, computed) {
+function displayTime (inputs, computed) {
   const values = inputs.map(input => input.value)
   const time = compute(values[0], values[1])
   computed.value = time
@@ -102,36 +138,58 @@ function displayTime(inputs, computed) {
  * Display the run's RTA time
  * @param {TimeInputs} inputs Inputs with time
  */
-function displayRTATime(inputs) {
-  const computed = getById('rta-time')
-  displayTime(inputs, computed)
+function displayIGT (chapterComputed, computedIGT) {
+  let total = 0
+  console.log(chapterComputed)
+  chapterComputed.forEach(computed => {
+    total += Number(computed.value)
+  })
+
+  if (isNaN(total)) return ''
+  console.log(total)
+
+  const frameRate = getFrameRate()
+  computedIGT.value = formatTime(total, frameRate)
+}
+
+function getFrameRate () {
+  return parseInt(document.getElementById('framerate').value)
 }
 
 /**
- * 
+ *
  * @param {Timestamp} startFrame - Start time
  * @param {Timestamp} endFrame - End time
  * @returns {string} A formatted time string
  */
-function compute(startFrame, endFrame) {
+function compute (startFrame, endFrame) {
   // Initiate basic time variables
-  let hours = 0
-  let minutes = 0
-  let seconds = 0
-  let milliseconds = 0
 
   // Get framerate, start frame, and end frame from corresponding elements
   // Double check they all have a value
-  const frameRate = parseInt(document.getElementById('framerate').value)
+  const frameRate = getFrameRate()
   if (!startFrame || !endFrame || !frameRate) {
     return ''
   }
 
   // Calculate framerate
   // Implicitly converts to number
-  let frames = (endFrame - startFrame) * frameRate
-  seconds = Math.floor(frames / frameRate)
-  frames = frames % frameRate
+  const delta = (endFrame - startFrame)
+  return formatTime(delta, frameRate)
+}
+
+function formatTime (delta, frameRate) {
+  if (isNaN(delta)) return ''
+  const totalFrames = Math.round(delta * frameRate)
+
+  let frames = 0
+  let hours = 0
+  let minutes = 0
+  let seconds = 0
+  let milliseconds = 0
+
+  seconds = Math.floor(totalFrames / frameRate)
+  frames = totalFrames % frameRate
   milliseconds = Math.round(frames / frameRate * 1000)
   if (milliseconds < 10) {
     milliseconds = '00' + milliseconds
@@ -156,7 +214,7 @@ function compute(startFrame, endFrame) {
  * Convert the debug stat info into a number in seconds
  * @param {Event} event - Event for the input being updated with debug stat
  */
-function parseForTime(event) {
+function parseForTime (event) {
   // Get current frame from input field (either start time or end time)
   const frameFromInputText = (JSON.parse(event.target.value)).lct
   if (typeof frameFromInputText !== 'undefined') {
