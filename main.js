@@ -3,7 +3,16 @@
  * @typedef {HTMLInputElement[]} TimeInputs
  */
 
-const CHAPTERS = 2
+let chapters = 2
+
+getById('segments').addEventListener('change', (e) => {
+  chapters = Number(e.target.value)
+  if (isNaN(chapters) || chapters < 1) {
+    chapters = 1
+  }
+
+  generatePage()
+})
 
 generatePage()
 
@@ -13,13 +22,18 @@ generatePage()
 function generatePage () {
   const div = getById('time-inputs')
   const headers = getById('segment-headers')
-  const createComputed = id => createComputedInput(getById(id))
-  const computedIGT = createComputed('igt-time')
-  const computedRTA = createComputed('rta-time')
+  const igtDiv = getById('igt-time')
+  const rtaDiv = getById('rta-time');
 
+  [div, headers, igtDiv, rtaDiv].forEach(e => {
+    e.innerHTML = ''
+  })
+
+  const computedIGT = createComputedInput(igtDiv)
+  const computedRTA = createComputedInput(rtaDiv)
   const chapterElements = {}
 
-  for (let i = 0; i < CHAPTERS; i++) {
+  for (let i = 0; i < chapters; i++) {
     const createInput = label => {
       const html = `
         <label for="startobj"> ${label} </label>
@@ -60,7 +74,7 @@ function updateTimes (currentCh, elements, computedRTA, computedIGT) {
   // rta time
   const rtaInputs = [
     elements[1].inputs[0],
-    elements[CHAPTERS].inputs[1]
+    elements[chapters].inputs[1]
   ]
   updateComputed(computedRTA, getDelta(rtaInputs))
 
