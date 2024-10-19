@@ -68,8 +68,7 @@ function generatePage () {
  * @param {HTMLInputElement} computedIGT - Input that displays the IGT time
  */
 function updateTimes (currentCh, elements, computedRTA, computedIGT) {
-  const frameRate = getFrameRate()
-  const updateComputed = (element, delta) => { element.value = formatTime(delta, frameRate) }
+  const updateComputed = (element, delta) => { element.value = formatTime(delta) }
 
   // rta time
   const rtaInputs = [
@@ -150,32 +149,19 @@ function createElement (options) {
 }
 
 /**
- * Gets the framerate from the user input
- * @returns {number} Framerate in frames per second
- */
-function getFrameRate () {
-  return parseInt(document.getElementById('framerate').value)
-}
-
-/**
  * Formats a time in seconds
  * @param {number} delta - The time in seconds
- * @param {number} frameRate - Run framerate in frames per second
  * @returns {string} Formatted time string
  */
-function formatTime (delta, frameRate) {
+function formatTime (delta) {
   if (isNaN(delta)) return ''
-  const totalFrames = Math.round(delta * frameRate)
-
-  let frames = 0
   let hours = 0
   let minutes = 0
   let seconds = 0
   let milliseconds = 0
 
-  seconds = Math.floor(totalFrames / frameRate)
-  frames = totalFrames % frameRate
-  milliseconds = Math.round(frames / frameRate * 1000)
+  seconds = Math.floor(delta)
+  milliseconds = Math.round(delta % 1 * 1000)
   if (milliseconds < 10) {
     milliseconds = '00' + milliseconds
   } else if (milliseconds < 100) {
@@ -201,14 +187,5 @@ function formatTime (delta, frameRate) {
  */
 function parseForTime (event) {
   // Get current frame from input field (either start time or end time)
-  const frameFromInputText = (JSON.parse(event.target.value)).lct
-  if (typeof frameFromInputText !== 'undefined') {
-    // Get the framerate
-    const frameRate = parseInt(document.getElementById('framerate').value)
-    // Calculate the frame
-    const frameFromObj = (time, fps) => Math.floor(time * fps) / fps // round to the nearest frame
-    const finalFrame = frameFromObj(frameFromInputText, frameRate)
-    // Update the DOM
-    event.target.value = `${finalFrame}`
-  }
+  event.target.value = (JSON.parse(event.target.value)).lct
 }
