@@ -187,5 +187,8 @@ function formatTime (delta) {
  */
 function parseForTime (event) {
   // Get current frame from input field (either start time or end time)
-  event.target.value = (JSON.parse(event.target.value)).lct
+  const value = event.target.value;
+
+  const valueFromDebug = (JSON.parse(value)).lct;
+  event.target.value = valueFromDebug === undefined ? value : valueFromDebug;
 }
